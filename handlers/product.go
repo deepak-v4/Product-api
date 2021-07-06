@@ -4,7 +4,8 @@ import(
 	"log"
 	"net/http"
 	"../data"
-	"regexp"
+	"github.com/gorilla/mux"
+	//"regexp"
 	"strconv"
 	//"encoding/json"
 )
@@ -17,7 +18,7 @@ func NewProduct(l*log.Logger) *Product {
 	return &Product{l}
 }
 
-func (p*Product)ServeHTTP(rw http.ResponseWriter,rd *http.Request)  {
+/*func (p*Product)ServeHTTP(rw http.ResponseWriter,rd *http.Request)  {
 
 	if rd.Method == http.MethodGet{
 		p.getProducts(rw,rd)
@@ -69,9 +70,9 @@ func (p*Product)ServeHTTP(rw http.ResponseWriter,rd *http.Request)  {
 	rw.WriteHeader(http.StatusMethodNotAllowed)
 }
 
+*/
 
-
-func (p*Product)getProducts(rw http.ResponseWriter, r *http.Request)  {
+func (p*Product)GetProducts(rw http.ResponseWriter, r *http.Request)  {
 	
 
 	p.l.Println("Handle Get Products")
@@ -87,7 +88,7 @@ func (p*Product)getProducts(rw http.ResponseWriter, r *http.Request)  {
 }
 
 
-func (p*Product)addProducts(rw http.ResponseWriter, rd *http.Request)  {
+func (p*Product)AddProducts(rw http.ResponseWriter, rd *http.Request)  {
 	
 	p.l.Println("Handle Post Products")
 	
@@ -104,10 +105,18 @@ func (p*Product)addProducts(rw http.ResponseWriter, rd *http.Request)  {
 }
 
 
-func (p Product) updateProducts(id int,rw http.ResponseWriter, rd*http.Request) {
+func (p*Product) UpdateProducts(rw http.ResponseWriter, rd*http.Request) {
+	
+	vars := mux.Vars(rd)
+	p.l.Println("Inside update..")
+	id,err :=strconv.Atoi(vars["id"])
+	if err !=nil{
+		http.Error(rw,"Unable to convert id to int",http.StatusBadRequest)
+		return
+	}
 	p.l.Println("Inside Update Products")
 	prod := &data.Product{}
-	err :=prod.FromJSON(rd.Body)
+	err =prod.FromJSON(rd.Body)
 	if err !=nil{
 		http.Error(rw,"Unable to unmarshal Json",http.StatusBadRequest)
 	}
