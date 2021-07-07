@@ -5,14 +5,16 @@ import(
 	"time"
 	"io"
 	"encoding/json"
+	"github.com/go-playground/validator"
+
 )
 
 type Product struct{
 
-	Name string `json:"PrdName"`
+	Name string `json:"PrdName" validate:"required"`
 	ID int `json:"id"`
 	Description string `json:"description"`
-	Price float32 `json:"price"`
+	Price float32 `json:"price" validate:"gt=0"`
 	SKU string`json:"sku"`
 	CreatedOn string`json:"-"`
 	UpdatedOn string`json:"-"`
@@ -21,6 +23,14 @@ type Product struct{
 }
 
 type Products []*Product
+
+
+func (p*Product) Validate() error{
+
+	validate := validator.New()
+	return validate.Struct(p)
+}
+
 
 
 func (p*Product) FromJSON(r io.Reader) error  {
@@ -86,7 +96,7 @@ func getNextID() int  {
 
 func UpdateProduct(id int, p*Product) error  {
 
-_,pos,err := findProduct(id)
+	_,pos,err := findProduct(id)
 
 if err !=nil{
 	return err
@@ -110,3 +120,5 @@ func findProduct(id int) (*Product,int, error)  {
 
 return nil,-1, ErrProductNotFound
 }
+
+
